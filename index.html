@@ -1,251 +1,132 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<title>Crypto Monitor</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-
-
-body {
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Top 50 Cryptocurrencies</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <style>
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+}
+#clock {
+  display: inline-block;
+  margin-top: 20px;
+  margin-left: 10px;
+  font-size: 24px;
+}
+body {
   background-color: #1e1e1e;
-  color: #f9f9f9;
+  color: #f5f5f5;
+  font-family: Arial, sans-serif;
 }
 
-header {
-  height: 60px;
-  width: 100%;
-  background-color: #2c2c2c;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-}
-
-header h1 {
-  margin: 0;
+h1 {
+  text-align: center;
+  margin-top: 20px;
   font-size: 24px;
 }
 
-header select {
-  padding: 5px;
-  border-radius: 5px;
-  border: none;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  font-size: 16px;
-  background-color: #4c4c4c;
-  color: #f9f9f9;
+#crypto-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-main {
-  padding: 20px;
-}
-
-#coins {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-#coins div {
-  border: 1px solid #4c4c4c;
-  border-radius: 5px;
+.crypto-card {
+  margin: 10px;
   padding: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  background-color: #2c2c2c;
+  width: 200px;
+  background-color: #2d2d2d;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
 }
 
-#coins h2 {
-  font-size: 20px;
-  margin: 0;
-  color: #f9f9f9;
+.crypto-card h2 {
+  margin-bottom: 5px;
+  font-size: 18px;
+  color: #f5f5f5;
 }
 
-#coins img {
-  max-width: 50px;
-  margin-bottom: 10px;
-}
-
-#coins p {
+.crypto-card p {
+  margin-bottom: 3px;
   font-size: 14px;
-  margin: 0;
-  line-height: 1.5;
-  color: #f9f9f9;
 }
 
-#coins a {
-  color: #2196F3;
-}
-        </style>
-</head>
-<body>
-	<header>
-		<h1>Crypto Monitor</h1>
-		<select id="currency">
-			<option value="usd">USD</option>
-			<option value="eur">EUR</option>
-			<option value="gbp">GBP</option>
-			<option value="jpy">JPY</option>
-		</select>
-	</header>
-	<main>
-		<div id="coins"></div>
-	</main>
-	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-	<script>
-// Get elements from the DOM
-const currencySelect = document.querySelector('#currency');
-const coinsDiv = document.querySelector('#coins');
-
-// Fetch data from the CoinGecko API
-async function fetchCoins(currency) {
-	try {
-		const response = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=false`);
-		return response.data;
-	} catch (error) {
-		console.error(error);
-	}
+.crypto-card img {
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+  vertical-align: middle;
 }
 
-// Render the coins in the DOM
-function renderCoins(coins) {
-	coinsDiv.innerHTML = '';
-	coins.forEach(function(coin) {
-		let coinDiv = document.createElement('div');
-		coinDiv.innerHTML = `
-			<h2>${coin.name}</h2>
-			<img src="${coin.image}" alt="${coin.name}">
-			<p>Current Price: ${coin.current_price} ${coin.symbol.toUpperCase()}</p>
-			<p>Market Cap: ${coin.market_cap} ${coin.symbol.toUpperCase()}</p>
-			<p>24h Change: ${coin.price_change_percentage_24h}%</p>
-		`;
-		coinsDiv.appendChild(coinDiv);
-	});
+.crypto-card.increase h2 {
+  color: #00ff00;
 }
 
-// Listen for currency select change event
-currencySelect.addEventListener('change', function() {
-	let currency = this.value;
-	fetchCoins(currency).then(function(coins) {
-		renderCoins(coins);
-	});
-});
+  </style>
+  <body>
+    <h1>Crypto Monitor - Time:<div id="clock"></div></h1>
+   
+    <div id="crypto-list"></div>
+    <script>
+const API_URL =
+  "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false";
 
-// Fetch coins on page load
-fetchCoins(currencySelect.value).then(function(coins) {
-	renderCoins(coins);
-});
+const cryptoList = document.getElementById("crypto-list");
 
-const coinsList = [
-  { id: "bitcoin", name: "Bitcoin" },
-  { id: "ethereum", name: "Ethereum" },
-  { id: "ripple", name: "XRP" },
-  { id: "tether", name: "Tether" },
-  { id: "cardano", name: "Cardano" },
-  { id: "litecoin", name: "Litecoin" },
-  { id: "chainlink", name: "Chainlink" },
-  { id: "stellar", name: "Stellar" },
-  { id: "usd-coin", name: "USD Coin" },
-  { id: "dogecoin", name: "Dogecoin" }
-];
+async function getCryptocurrencies() {
+  try {
+    const response = await fetch(API_URL);
+    const data = await response.json();
 
-const apiUrl = "https://api.coingecko.com/api/v3";
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  legend: {
-    display: false
-  },
-  tooltips: {
-    intersect: false,
-    mode: "index",
-    position: "nearest",
-    callbacks: {
-      label: function(tooltipItem, data) {
-        const label = data.datasets[tooltipItem.datasetIndex].label || "";
-        return label + tooltipItem.yLabel.toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD"
-        });
-      }
-    }
-  },
-  scales: {
-    xAxes: [{
-      type: "time",
-      time: {
-        unit: "hour"
-      }
-    }],
-    yAxes: [{
-      ticks: {
-        beginAtZero: true,
-        callback: function(value, index, values) {
-          return value.toLocaleString("en-US", {
-            style: "currency",
-            currency: "USD"
-          });
-        }
-      }
-    }]
-  }
-};
+    data.forEach((crypto) => {
+      const cryptoCard = document.createElement("div");
+      cryptoCard.classList.add("crypto-card");
 
-async function getCryptoData(coinId) {
-  const response = await fetch(`${apiUrl}/coins/${coinId}/market_chart?vs_currency=usd&days=1`);
-  const data = await response.json();
-  const prices = data.prices;
-  const chartData = {
-    labels: prices.map(price => moment(price[0]).format("MM/DD/YYYY hh:mm A")),
-    datasets: [
-      {
-        label: `${coinId.toUpperCase()} Price`,
-        data: prices.map(price => price[1]),
-        borderColor: "#2196F3",
-        fill: false
-      }
-    ]
-  };
-  return chartData;
-}
+      const cryptoImg = document.createElement("img");
+      cryptoImg.src = crypto.image;
+      cryptoImg.alt = `${crypto.name} logo`;
 
-async function renderCharts() {
-  const coinsContainer = document.getElementById("coins");
+      const cryptoName = document.createElement("h2");
+      cryptoName.textContent = crypto.name;
 
-  for (const coin of coinsList) {
-    const coinDiv = document.createElement("div");
-    coinDiv.classList.add("coin");
+      const cryptoSymbol = document.createElement("p");
+      cryptoSymbol.textContent = `Symbol: ${crypto.symbol.toUpperCase()}`;
 
-    const name = document.createElement("h2");
-    name.innerText = coin.name;
-    coinDiv.appendChild(name);
+      const cryptoPrice = document.createElement("p");
+      cryptoPrice.textContent = `Price: $${crypto.current_price}`;
 
-    const chartContainer = document.createElement("div");
-    chartContainer.classList.add("chart-container");
-    coinDiv.appendChild(chartContainer);
+      const cryptoMarketCap = document.createElement("p");
+      cryptoMarketCap.textContent = `Market Cap: $${crypto.market_cap}`;
 
-    const chart = document.createElement("canvas");
-    chart.classList.add("chart");
-    chartContainer.appendChild(chart);
-
-    coinsContainer.appendChild(coinDiv);
-
-    const chartData = await getCryptoData(coin.id);
-    new Chart(chart, {
-      type: "line",
-      data: chartData,
-      options: chartOptions
+      cryptoCard.append(cryptoImg, cryptoName, cryptoSymbol, cryptoPrice, cryptoMarketCap);
+      cryptoList.appendChild(cryptoCard);
     });
+  } catch (error) {
+    console.error(error);
   }
 }
 
-renderCharts();
+getCryptocurrencies();
+// Get the clock element
+const clock = document.getElementById("clock");
 
-	</script>
-</body>
+// Update the clock every second
+setInterval(() => {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, "0");
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const seconds = now.getSeconds().toString().padStart(2, "0");
+  const timeString = `${hours}:${minutes}:${seconds}`;
+  clock.textContent = timeString;
+}, 1000);
+
+
+    </script>
+  </body>
 </html>
